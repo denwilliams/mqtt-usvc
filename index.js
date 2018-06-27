@@ -1,9 +1,10 @@
 const { readFileSync } = require('fs');
 const { EventEmitter } = require('events');
 const mqtt = require('mqtt');
+const yaml = require('js-yaml');
 
 exports.create = (config = {}) => {
-  const path = config.configPath || process.env.CONFIG_PATH;
+  const path = process.env.CONFIG_PATH || config.configPath;
   const fileConfig = path ? yaml.safeLoad(readFileSync(path, 'utf8')) : {};
 
   const mergedConfig = Object.assign(fileConfig, config);
@@ -12,8 +13,8 @@ exports.create = (config = {}) => {
 
   const e = new EventEmitter();
 
-  const uri = mqttConfig.uri || process.env.MQTT_URI;
-  const prefix = mqttConfig.prefix || process.env.MQTT_PREFIX || '';
+  const uri = process.env.MQTT_URI || mqttConfig.uri;
+  const prefix = process.env.MQTT_PREFIX || mqttConfig.prefix || '';
   const subscriptions = mqttConfig.subscriptions || [];
 
   console.log('Connecting to ' + uri);
