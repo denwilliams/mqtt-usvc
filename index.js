@@ -39,8 +39,8 @@ exports.create = (config = {}) => {
     e.emit('message', topic, data);
   });
 
-  e.send = (key, data) => {
-    client.publish(prefix + key, JSON.stringify(data));
+  e.send = (key, data, { retain } = {}) => {
+    client.publish(prefix + key, JSON.stringify(data), { retain });
   };
 
   e.end = () => client.end();
