@@ -5,11 +5,20 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Den Williams",
   "license": "MIT",
-  "description": "",
+  "description": "Module to make writing Node.js MQTT microservices dead simple and quick.",
   "dependencies": {
     "js-yaml": "^3.12.0",
     "mqtt": "^2.18.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/denwilliams/mqtt-usvc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/denwilliams/mqtt-usvc/issues"
+  },
+  "homepage": "https://github.com/denwilliams/mqtt-usvc#readme"
 }
