@@ -20,12 +20,12 @@ exports.create = (config = {}) => {
   console.log('Connecting to ' + uri);
   const client  = mqtt.connect(uri);
 
-  client.on('connect', function () {
+  client.on('connect', () => {
     console.log('MQTT connected');
     (subscriptions).forEach(s => client.subscribe(s));
   });
 
-  client.on('message', function (topic, message) {
+  client.on('message', (topic, message) => {
     // message is Buffer
     const str = message.toString();
     let data;
@@ -36,11 +36,19 @@ exports.create = (config = {}) => {
       data = str;
     }
 
+    if (topic.startsWith(prefix)) {
+      e.emit('message', topic.replace(prefix, ''), data);
+      return;
+    }
+
     e.emit('message', topic, data);
   });
 
   e.send = (key, data, { retain } = {}) => {
     client.publish(prefix + key, JSON.stringify(data), { retain });
+  };
+  e.subscribe = (key) => {
+    client.subscribe(prefix + key);
   };
 
   e.end = () => client.end();
