@@ -46,6 +46,7 @@ exports.create = (config = {}) => {
   e.end = () => client.end();
 
   e.config = serviceConfig;
+  e.prefix = prefix;
 
   return e;
 };
