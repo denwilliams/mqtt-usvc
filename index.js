@@ -25,6 +25,27 @@ exports.create = (config = {}) => {
     (subscriptions).forEach(s => client.subscribe(s));
   });
 
+  client.on('reconnect', () => {
+    console.log('MQTT reconnecting');
+  });
+
+  client.on('close', () => {
+    console.log('MQTT disconnected');
+  });
+
+  client.on('offline', () => {
+    console.log('MQTT offline');
+  });
+
+  client.on('end', () => {
+    console.log('MQTT end');
+  });
+
+  client.on('error', () => {
+    console.error('MQTT error', err);
+    process.exit(1);
+  });
+
   client.on('message', (topic, message) => {
     // message is Buffer
     const str = message.toString();
