@@ -1,18 +1,28 @@
 {
   "name": "mqtt-usvc",
-  "version": "1.0.6",
-  "main": "index.js",
+  "version": "1.1.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "rm -rf ./dist && tsc",
+    "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Den Williams",
   "license": "MIT",
   "description": "Module to make writing Node.js MQTT microservices dead simple and quick.",
   "dependencies": {
-    "js-yaml": "^3.12.0",
-    "mqtt": "^2.18.1"
+    "@types/js-yaml": "^3.12.3",
+    "js-yaml": "^3.13.1",
+    "mqtt": "^3.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^13.11.1",
+    "typescript": "^3.8.3"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/denwilliams/mqtt-usvc.git"
