@@ -15,11 +15,11 @@
   "license": "MIT",
   "description": "Module to make writing Node.js MQTT microservices dead simple and quick.",
   "dependencies": {
-    "@types/js-yaml": "^3.12.3",
     "js-yaml": "^3.13.1",
     "mqtt": "^3.0.0"
   },
   "devDependencies": {
+    "@types/js-yaml": "^3.12.3",
     "@types/node": "^13.11.1",
     "typescript": "^3.8.3"
   },
