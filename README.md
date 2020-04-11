@@ -25,13 +25,7 @@ service:
   interval: 1000
 ```
 
-Then launch your service with either a `--config` arg
-
-```
-node my_service.js --config /path/to/config.yml
-```
-
-or with environment variables:
+Then launch your service with environment variables:
 
 ```
 CONFIG_FILE=/path/to/config.yml node my_service.js
