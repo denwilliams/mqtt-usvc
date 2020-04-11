@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { EventEmitter } from "events";
-import mqtt, { IClientPublishOptions } from "mqtt";
+import mqtt from "mqtt";
 import yaml from "js-yaml";
 
 interface MqttConfig {
@@ -28,6 +28,8 @@ interface PublishOptions {
   retain?: boolean;
 }
 
+type ServiceEvent = "message";
+
 interface Service<ServiceConfig> {
   /** The service config loaded from file, or passed into create. */
   readonly config: ServiceConfig;
@@ -38,6 +40,12 @@ interface Service<ServiceConfig> {
   send(key: string, data: any, options?: PublishOptions): void;
   sendRoot(key: string, data: any, options?: PublishOptions): void;
   end(): void;
+  on(event: ServiceEvent, listener: (topic: string, data: any) => void): void;
+  removeListener(
+    event: ServiceEvent,
+    listener: (topic: string, data: any) => void
+  ): void;
+  removeAllListeners(event: ServiceEvent): void;
 }
 
 interface Options {
@@ -80,24 +88,39 @@ export function create<ServiceConfig>(
   logger.info("Connecting to " + uri);
   const client = mqtt.connect(uri);
 
+  const topic = (key: string) =>
+    key.startsWith("~") ? key.replace("~", prefix) : key;
+
   const service: Service<ServiceConfig> = {
     config: serviceConfig,
     prefix: prefix,
 
-    send(key: string, data: any, options: PublishOptions) {
-      client.publish(prefix + key, JSON.stringify(data), options);
+    send(key, data, options: PublishOptions) {
+      client.publish(topic(key), JSON.stringify(data), options);
     },
 
-    sendRoot(key: string, data: any, options: PublishOptions) {
-      client.publish(key, JSON.stringify(data), options);
+    sendRoot(key, data, options: PublishOptions) {
+      client.publish(topic(key), JSON.stringify(data), options);
     },
 
-    subscribe(key: string) {
-      client.subscribe(prefix + key);
+    subscribe(key) {
+      client.subscribe(topic(key));
     },
 
     end() {
       client.end();
+    },
+
+    on(event, listener) {
+      e.on(event, listener);
+    },
+
+    removeListener(event, listener) {
+      e.removeListener(event, listener);
+    },
+
+    removeAllListeners(event) {
+      e.removeAllListeners(event);
     }
   };
 
@@ -139,7 +162,7 @@ export function create<ServiceConfig>(
     }
 
     if (topic.startsWith(prefix)) {
-      e.emit("message", topic.replace(prefix, ""), data);
+      e.emit("message", topic.replace(prefix, "~"), data);
       return;
     }
 
