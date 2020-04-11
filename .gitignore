@@ -60,4 +60,8 @@ typings/
 # next.js build output
 .next
 
+# No lock file for libraries
+package-lock.json
+
+# No compiled output
 dist/
