@@ -3,21 +3,21 @@ import { EventEmitter } from "events";
 import mqtt from "mqtt";
 import yaml from "js-yaml";
 
-interface MqttConfig {
+export interface MqttConfig {
   uri?: string;
   prefix?: string;
   subscriptions?: string[];
 }
 
-interface Config<ServiceConfig> {
+export interface Config<ServiceConfig> {
   configPath?: string;
   service?: ServiceConfig;
   mqtt?: MqttConfig;
 }
 
-type QoS = 0 | 1 | 2;
+export type QoS = 0 | 1 | 2;
 
-interface PublishOptions {
+export interface PublishOptions {
   /**
    * the QoS
    */
@@ -28,9 +28,9 @@ interface PublishOptions {
   retain?: boolean;
 }
 
-type ServiceEvent = "message";
+export type ServiceEvent = "message";
 
-interface Service<ServiceConfig> {
+export interface Service<ServiceConfig> {
   /** The service config loaded from file, or passed into create. */
   readonly config: ServiceConfig;
   /** MQTT topic prefix in use for publishing. */
@@ -48,7 +48,7 @@ interface Service<ServiceConfig> {
   removeAllListeners(event: ServiceEvent): void;
 }
 
-interface Options {
+export interface Options {
   logger?: {
     info(message?: any, ...optionalParams: any[]): void;
     warn(message?: any, ...optionalParams: any[]): void;
