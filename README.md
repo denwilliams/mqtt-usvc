@@ -18,7 +18,8 @@ To use a configuration file just create a YAML file with the keys:
 mqtt:
   uri: "mqtt://localhost",
   prefix: "ticker/",
-  subscriptions: ["ticker/#"]
+  subscriptions:
+    - "~/set/#"
 service:
   # service config schema is open, just put what you need here
   interval: 1000
