@@ -1,6 +1,7 @@
 import consul from "consul";
 import { readFileSync } from "fs";
 import yaml from "js-yaml";
+import { isNumber } from "util";
 
 export interface MqttConfig {
   uri?: string;
@@ -25,7 +26,17 @@ export interface Config<ServiceConfig> {
   http: Required<HttpConfig>;
 }
 
-async function getConsulConfig<ServiceConfig>(prefix?: string) {
+function parseString(str: string) {
+  if (str === "true") return true;
+  if (str === "false") return false;
+  if (str === "null") return null;
+  if (str === "undefined") return undefined;
+  const num = Number(str);
+  if (!isNaN(num)) return num;
+  return str;
+}
+
+async function getConsulConfigNested<ServiceConfig>(prefix?: string) {
   if (!prefix) return undefined;
 
   const consulClient = consul({ promisify: true });
@@ -34,14 +45,34 @@ async function getConsulConfig<ServiceConfig>(prefix?: string) {
   );
   const values = (await Promise.all(
     keys.map((key) => consulClient.kv.get(key))
-  )) as string[];
+  )) as any[];
 
-  return keys.reduce((obj, key, i) => {
-    const fieldName = key.replace(prefix, "") as "mqtt" | "http" | "service";
-    const value = JSON.parse(values[i]);
-    obj[fieldName] = value;
+  return values.reduce((obj, value, i) => {
+    const { Key, Value } = value;
+    const fullPath: string = Key.replace(prefix, "");
+    const path = fullPath.split("/").filter((s) => s !== "");
+    if (!path.length) return obj;
+    const basePath = path.splice(0, path.length - 1);
+    const [fieldName] = path;
+
+    const base = basePath.reduce((x, k) => x[k], obj);
+    if (Value === null) {
+      base[fieldName] = {};
+    } else {
+      base[fieldName] = parseString(Value);
+    }
     return obj;
-  }, {} as ConfigVars<ServiceConfig>);
+  }, {} as any);
+}
+
+async function getConsulConfigJson<ServiceConfig>(
+  key?: string
+): Promise<ConfigVars<ServiceConfig> | undefined> {
+  if (!key) return undefined;
+
+  const consulClient = consul({ promisify: true });
+  const result: any = await consulClient.kv.get(key);
+  return JSON.parse(result.Value);
 }
 
 export async function getConfig<ServiceConfig>(
@@ -53,14 +84,19 @@ export async function getConfig<ServiceConfig>(
     ? yaml.safeLoad(readFileSync(path, "utf8"))
     : undefined;
 
-  const consulConfigKeys = await getConsulConfig<ServiceConfig>(
+  const consulConfigNested = await getConsulConfigNested<ServiceConfig>(
     process.env.CONSUL_KV_PREFIX
+  );
+
+  const consulConfigJson = await getConsulConfigJson<ServiceConfig>(
+    process.env.CONSUL_KV_KEY
   );
 
   const mergedConfig = Object.assign(
     {},
     fileConfig,
-    consulConfigKeys,
+    consulConfigNested,
+    consulConfigJson,
     configVars
   );
 

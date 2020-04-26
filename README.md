@@ -49,9 +49,21 @@ mqtt://username:password@localhost
 
 ### Using Consul KV for Configuration
 
+With all config in single field as JSON:
+
+```
+CONSUL_KV_KEY=ticker_config node my_service.js
+```
+
+This will parse the value of `ticker_config` as JSON and use that.
+
+...alternatively...
+
 CONSUL_KV_PREFIX=ticker/ node my_service.js
 
-It will then fetch all config from Consul's KV store in the same structure as the YAML config:
+It will then fetch all keys from Consul's KV under this prefix and construct an object.
+
+Note: because all KV values are strings it attempts to figure out whether values are numbers, bools, etc when parsing.
 
 ```
 ticker/mqtt/uri
