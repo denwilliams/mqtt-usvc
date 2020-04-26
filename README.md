@@ -1,5 +1,7 @@
 # mqtt-usvc
 
+**Breaking change: create() is now async, and there is now a peer dependency on prom-client.**
+
 Module to make writing Node.js MQTT microservices dead simple and quick.
 
 See `example.js` for reference.
