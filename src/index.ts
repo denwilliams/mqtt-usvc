@@ -1,5 +1,7 @@
 import { readFileSync } from "fs";
 import { EventEmitter } from "events";
+import { parse } from "url";
+import { createServer } from "http";
 import mqtt from "mqtt";
 import yaml from "js-yaml";
 
@@ -9,10 +11,15 @@ export interface MqttConfig {
   subscriptions?: string[];
 }
 
+export interface HttpConfig {
+  port?: number;
+}
+
 export interface Config<ServiceConfig> {
   configPath?: string;
   service?: ServiceConfig;
   mqtt?: MqttConfig;
+  http?: HttpConfig;
 }
 
 export type QoS = 0 | 1 | 2;
@@ -64,6 +71,7 @@ export function create<ServiceConfig>(
   options = {} as Options
 ): Service<ServiceConfig> {
   const { logger = console } = options;
+  let mqttConnected = false;
 
   const path = process.env.CONFIG_PATH || config.configPath;
 
@@ -124,9 +132,41 @@ export function create<ServiceConfig>(
     }
   };
 
+  function startHttpServer(port: number) {
+    const server = createServer((req, res) => {
+      const sendResponse = (
+        data: string,
+        statusCode: number,
+        headers?: Record<string, string>
+      ) => {
+        res.writeHead(statusCode, headers);
+        res.end(data);
+      };
+
+      if (req.method === "GET" && req.url) {
+        const parts = parse(req.url);
+        if (parts.pathname === "/status") {
+          if (mqttConnected) {
+            sendResponse("OK", 200, {
+              "Content-Type": "text/plain"
+            });
+          } else {
+            sendResponse("Not OK", 500, {
+              "Content-Type": "text/plain"
+            });
+          }
+          return;
+        }
+      }
+      sendResponse("Not found", 404, { "Content-Type": "text/plain" });
+    });
+    server.listen(port);
+  }
+
   client.on("connect", () => {
     logger.info("MQTT connected");
     subscriptions.forEach(s => client.subscribe(s));
+    mqttConnected = true;
   });
 
   client.on("reconnect", () => {
@@ -134,14 +174,17 @@ export function create<ServiceConfig>(
   });
 
   client.on("close", () => {
+    mqttConnected = false;
     logger.info("MQTT disconnected");
   });
 
   client.on("offline", () => {
+    mqttConnected = false;
     logger.info("MQTT offline");
   });
 
   client.on("end", () => {
+    mqttConnected = false;
     logger.info("MQTT end");
   });
 
@@ -168,6 +211,12 @@ export function create<ServiceConfig>(
 
     e.emit("message", topic, data);
   });
+
+  const httpConfig = mergedConfig.http || {};
+  const port = process.env.HTTP_PORT || httpConfig.port;
+  if (port) {
+    startHttpServer(parseInt(String(port)));
+  }
 
   return service;
 }

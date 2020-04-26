@@ -20,6 +20,8 @@ mqtt:
   prefix: "ticker/",
   subscriptions:
     - "~/set/#"
+http:
+  port: 8080
 service:
   # service config schema is open, just put what you need here
   interval: 1000

@@ -20,6 +20,9 @@ const service = mqttusvc.create({
     // you may want to subscribe to services elsewhere)
     subscriptions: ["~/#"]
   },
+  http: {
+    port: 9988
+  },
   // The service config
   service: {
     interval: 1000
