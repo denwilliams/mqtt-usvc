@@ -133,6 +133,7 @@ export function create<ServiceConfig>(
   };
 
   function startHttpServer(port: number) {
+    console.log("Starting HTTP server on port " + port);
     const server = createServer((req, res) => {
       const sendResponse = (
         data: string,
@@ -160,7 +161,12 @@ export function create<ServiceConfig>(
       }
       sendResponse("Not found", 404, { "Content-Type": "text/plain" });
     });
-    server.listen(port);
+    server.listen(port, () => {
+      console.log("Server now listening on port " + port);
+    });
+    server.on("error", err => {
+      console.error("HTTP server error " + err);
+    });
   }
 
   client.on("connect", () => {
