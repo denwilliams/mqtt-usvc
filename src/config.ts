@@ -33,6 +33,7 @@ function parseString(str: string) {
   if (str === "undefined") return undefined;
   const num = Number(str);
   if (!isNaN(num)) return num;
+  if (str[0] === "{") return JSON.parse(str);
   return str;
 }
 
@@ -44,13 +45,13 @@ async function getConsulConfigNested<ServiceConfig>(prefix?: string) {
     process.env.CONSUL_KV_PREFIX
   );
   const values = (await Promise.all(
-    keys.map((key) => consulClient.kv.get(key))
+    keys.map(key => consulClient.kv.get(key))
   )) as any[];
 
   return values.reduce((obj, value, i) => {
     const { Key, Value } = value;
     const fullPath: string = Key.replace(prefix, "");
-    const path = fullPath.split("/").filter((s) => s !== "");
+    const path = fullPath.split("/").filter(s => s !== "");
     if (!path.length) return obj;
     const basePath = path.splice(0, path.length - 1);
     const [fieldName] = path;
@@ -116,17 +117,17 @@ export async function getConfig<ServiceConfig>(
     subscriptions: [],
     ...mergedConfig.mqtt,
     uri: mqttUri,
-    prefix: mqttPrefix,
+    prefix: mqttPrefix
   };
   const http: Required<HttpConfig> = {
     ...mergedConfig.http,
-    port: httpPort,
+    port: httpPort
   };
   const service: ServiceConfig = mergedConfig.service || ({} as ServiceConfig);
 
   return {
     mqtt,
     http,
-    service,
+    service
   };
 }
