@@ -56,7 +56,12 @@ async function getConsulConfigNested<ServiceConfig>(prefix?: string) {
     const basePath = path.splice(0, path.length - 1);
     const [fieldName] = path;
 
-    const base = basePath.reduce((x, k) => x[k], obj);
+    const base = basePath.reduce((x, k) => {
+      if (!x[k]) {
+        x[k] = {};
+      }
+      return x[k];
+    }, obj);
     if (Value === null) {
       base[fieldName] = {};
     } else {
