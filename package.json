@@ -1,6 +1,6 @@
 {
   "name": "mqtt-usvc",
-  "version": "2.2.1",
+  "version": "3.0.4",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
@@ -15,13 +15,19 @@
   "license": "MIT",
   "description": "Module to make writing Node.js MQTT microservices dead simple and quick.",
   "dependencies": {
+    "consul": "^0.37.0",
     "js-yaml": "^3.13.1",
     "mqtt": "^3.0.0"
   },
   "devDependencies": {
+    "@types/consul": "^0.23.34",
     "@types/js-yaml": "^3.12.3",
     "@types/node": "^13.11.1",
+    "prom-client": "^12.0.0",
     "typescript": "^3.8.3"
+  },
+  "peerDependencies": {
+    "prom-client": "*"
   },
   "repository": {
     "type": "git",
