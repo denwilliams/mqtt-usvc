@@ -1,5 +1,5 @@
 import { Logger, getLogger } from "./logging";
-import { Config, getConfig } from "./config";
+import { Config, getConfig, ConfigVars } from "./config";
 import { startHttpServer } from "./http";
 import { Service, createService } from "./service";
 
@@ -11,7 +11,7 @@ export interface Options {
  * Create the microservice
  */
 export async function create<ServiceConfig>(
-  config?: Config<ServiceConfig>,
+  config?: ConfigVars<ServiceConfig>,
   options?: Options
 ): Promise<Service<ServiceConfig>> {
   const logger = getLogger(options);
