@@ -2,6 +2,7 @@ import { Logger, getLogger } from "./logging";
 import { Config, getConfig, ConfigVars } from "./config";
 import { startHttpServer } from "./http";
 import { Service, createService } from "./service";
+export { Service as MqttService } from "./service";
 
 export interface Options {
   logger?: Logger;
