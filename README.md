@@ -32,7 +32,7 @@ service:
 Then launch your service with environment variables:
 
 ```
-CONFIG_FILE=/path/to/config.yml node my_service.js
+CONFIG_PATH=/path/to/config.yml node my_service.js
 ```
 
 ### Using Only Environment Variables
