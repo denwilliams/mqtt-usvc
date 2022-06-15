@@ -1,7 +1,6 @@
 import consul from "consul";
 import { readFileSync } from "fs";
 import yaml from "js-yaml";
-import { isNumber } from "util";
 
 export interface MqttConfig {
   uri?: string;
@@ -45,13 +44,13 @@ async function getConsulConfigNested<ServiceConfig>(prefix?: string) {
     process.env.CONSUL_KV_PREFIX
   );
   const values = (await Promise.all(
-    keys.map(key => consulClient.kv.get(key))
+    keys.map((key) => consulClient.kv.get(key))
   )) as any[];
 
   return values.reduce((obj, value, i) => {
     const { Key, Value } = value;
     const fullPath: string = Key.replace(prefix, "");
-    const path = fullPath.split("/").filter(s => s !== "");
+    const path = fullPath.split("/").filter((s) => s !== "");
     if (!path.length) return obj;
     const basePath = path.splice(0, path.length - 1);
     const [fieldName] = path;
@@ -76,7 +75,16 @@ async function getConsulConfigJson<ServiceConfig>(
 ): Promise<ConfigVars<ServiceConfig> | undefined> {
   if (!key) return undefined;
 
-  const consulClient = consul({ promisify: true });
+  const opts: consul.ConsulOptions = { promisify: true };
+
+  if (process.env.CONSUL_HOST) {
+    opts.host = process.env.CONSUL_HOST;
+  }
+  if (process.env.CONSUL_PORT) {
+    opts.port = process.env.CONSUL_PORT;
+  }
+
+  const consulClient = consul(opts);
   const result: any = await consulClient.kv.get(key);
   return JSON.parse(result.Value);
 }
@@ -86,8 +94,8 @@ export async function getConfig<ServiceConfig>(
 ): Promise<Config<ServiceConfig>> {
   const path = process.env.CONFIG_PATH || configVars?.configPath;
 
-  const fileConfig: ConfigVars<ServiceConfig> = path
-    ? yaml.safeLoad(readFileSync(path, "utf8"))
+  const fileConfig: ConfigVars<ServiceConfig> | undefined = path
+    ? (yaml.load(readFileSync(path, "utf8")) as any)
     : undefined;
 
   const consulConfigNested = await getConsulConfigNested<ServiceConfig>(
@@ -122,17 +130,17 @@ export async function getConfig<ServiceConfig>(
     subscriptions: [],
     ...mergedConfig.mqtt,
     uri: mqttUri,
-    prefix: mqttPrefix
+    prefix: mqttPrefix,
   };
   const http: Required<HttpConfig> = {
     ...mergedConfig.http,
-    port: httpPort
+    port: httpPort,
   };
   const service: ServiceConfig = mergedConfig.service || ({} as ServiceConfig);
 
   return {
     mqtt,
     http,
-    service
+    service,
   };
 }
