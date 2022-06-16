@@ -5,8 +5,8 @@ import { register } from "prom-client";
 
 export function startHttpServer(port: number, service: Service<any>) {
   console.log("Starting HTTP server on port " + port);
-  const server = createServer((req, res) => {
-    const sendResponse = (
+  const server = createServer(async (req, res) => {
+    const sendResponse = async (
       data: string,
       statusCode: number,
       headers?: Record<string, string>
@@ -18,7 +18,7 @@ export function startHttpServer(port: number, service: Service<any>) {
     if (req.method === "GET" && req.url) {
       const parts = parse(req.url);
       if (parts.pathname === "/metrics") {
-        sendResponse(register.metrics(), 200, {
+        sendResponse(await register.metrics(), 200, {
           "Content-Type": "text/plain",
         });
         return;
