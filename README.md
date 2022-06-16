@@ -1,6 +1,8 @@
 # mqtt-usvc
 
-**Breaking change: create() is now async, and there is now a peer dependency on prom-client.**
+**Breaking change: now requires prom-client v14 (previously v12). Old version will not work due to changing API.**
+
+**Breaking change: create() is now async in v3, and there is now a peer dependency on prom-client.**
 
 Opinionated module to make writing Node.js MQTT microservices dead simple and quick.
 
