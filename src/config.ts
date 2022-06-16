@@ -1,6 +1,9 @@
 import consul from "consul";
-import { readFileSync } from "fs";
+import { readFile } from "fs";
+import { promisify } from "util";
 import yaml from "js-yaml";
+
+const readFileAsync = promisify(readFile);
 
 export interface MqttConfig {
   uri?: string;
@@ -39,10 +42,24 @@ function parseString(str: string) {
 async function getConsulConfigNested<ServiceConfig>(prefix?: string) {
   if (!prefix) return undefined;
 
-  const consulClient = consul({ promisify: true });
-  const keys: string[] = await consulClient.kv.keys(
-    process.env.CONSUL_KV_PREFIX
+  const opts: consul.ConsulOptions = { promisify: true };
+
+  if (process.env.CONSUL_HOST) {
+    opts.host = process.env.CONSUL_HOST;
+  }
+  if (process.env.CONSUL_PORT) {
+    opts.port = process.env.CONSUL_PORT;
+  }
+
+  console.info(
+    "Fetching config from Consul host=%s port=%s prefix=%s",
+    opts.host || "default",
+    opts.port || "default",
+    prefix
   );
+
+  const consulClient = consul(opts);
+  const keys: string[] = await consulClient.kv.keys(prefix);
   const values = (await Promise.all(
     keys.map((key) => consulClient.kv.get(key))
   )) as any[];
@@ -84,6 +101,13 @@ async function getConsulConfigJson<ServiceConfig>(
     opts.port = process.env.CONSUL_PORT;
   }
 
+  console.info(
+    "Fetching config from Consul host=%s port=%s key=%s",
+    opts.host || "default",
+    opts.port || "default",
+    key
+  );
+
   const consulClient = consul(opts);
   const result: any = await consulClient.kv.get(key);
   return JSON.parse(result.Value);
@@ -95,7 +119,7 @@ export async function getConfig<ServiceConfig>(
   const path = process.env.CONFIG_PATH || configVars?.configPath;
 
   const fileConfig: ConfigVars<ServiceConfig> | undefined = path
-    ? (yaml.load(readFileSync(path, "utf8")) as any)
+    ? (yaml.load(await readFileAsync(path, "utf8")) as any)
     : undefined;
 
   const consulConfigNested = await getConsulConfigNested<ServiceConfig>(

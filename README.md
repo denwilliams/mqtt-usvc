@@ -2,11 +2,13 @@
 
 **Breaking change: create() is now async, and there is now a peer dependency on prom-client.**
 
-Module to make writing Node.js MQTT microservices dead simple and quick.
+Opinionated module to make writing Node.js MQTT microservices dead simple and quick.
 
 See `example.js` for reference.
 
-Can be configured from YAML, environment variables, or code.
+Can be configured from YAML, environment variables, Consul KV store, or code.
+
+Exposes Prometheus metrics over HTTP (/metrics) for scraping into a Prometheus server.
 
 **Breaking: prefix is now not automatic in v2 - must use `~` character.**
 
@@ -51,6 +53,8 @@ mqtt://username:password@localhost
 
 ### Using Consul KV for Configuration
 
+Configuration can optionally be fetched from Consul's KV store.
+
 With all config in single field as JSON:
 
 ```
@@ -76,6 +80,8 @@ ticker/service
 ```
 
 etc
+
+If Consul isn't on the localhost, or the usual ports you can specify a different host using `CONSUL_HOST` and/or `CONSUL_PORT`.
 
 ## Usage
 
