@@ -145,22 +145,30 @@ export async function getConfig<ServiceConfig>(
 
   const mqttPrefix = process.env.MQTT_PREFIX || mergedConfig.mqtt?.prefix || "";
 
+  const mqttSubscriptions =
+    process.env.MQTT_SUBSCRIPTIONS?.split(",") ||
+    mergedConfig.mqtt?.subscriptions ||
+    [];
+
+  const mqtt: Required<MqttConfig> = {
+    uri: mqttUri,
+    prefix: mqttPrefix,
+    subscriptions: mqttSubscriptions,
+  };
+
   const httpPort: number | null =
     (process.env.HTTP_PORT && parseInt(process.env.HTTP_PORT)) ||
     mergedConfig.http?.port ||
     null;
 
-  const mqtt: Required<MqttConfig> = {
-    subscriptions: [],
-    ...mergedConfig.mqtt,
-    uri: mqttUri,
-    prefix: mqttPrefix,
-  };
   const http: Required<HttpConfig> = {
-    ...mergedConfig.http,
     port: httpPort,
   };
-  const service: ServiceConfig = mergedConfig.service || ({} as ServiceConfig);
+
+  const service: ServiceConfig =
+    (process.env.SERVICE_CONFIG && JSON.parse(process.env.SERVICE_CONFIG)) ||
+    mergedConfig.service ||
+    ({} as ServiceConfig);
 
   return {
     mqtt,

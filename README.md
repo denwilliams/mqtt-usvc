@@ -53,6 +53,17 @@ Just put it in the MQTT URI:
 mqtt://username:password@localhost
 ```
 
+### Using Environment Variables for Configuration
+
+You can also use environment variables for configuration instead of a config file.
+The following environment variables are supported:
+
+- `MQTT_URI` - MQTT URI (e.g. `mqtt://localhost`)
+- `MQTT_PREFIX` - MQTT prefix (e.g. `ticker`)
+- `MQTT_SUBSCRIPTIONS` - Comma separated list of subscriptions (e.g. `~/set/#,~/reset` where `~` is replaced with the prefix)
+- `HTTP_PORT` - HTTP port for metrics (e.g. `8080`)
+- `SERVICE_CONFIG` - Service config as JSON (e.g. `{"interval": 1000}`)
+
 ### Using Consul KV for Configuration
 
 Configuration can optionally be fetched from Consul's KV store.
@@ -67,7 +78,9 @@ This will parse the value of `ticker_config` as JSON and use that.
 
 ...alternatively...
 
+```
 CONSUL_KV_PREFIX=ticker/ node my_service.js
+```
 
 It will then fetch all keys from Consul's KV under this prefix and construct an object.
 
